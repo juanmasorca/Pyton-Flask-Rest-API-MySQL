@@ -19,7 +19,7 @@ def listar_cursos():
             cursos.append(curso)
         return jsonify({'Cursos': cursos, 'Mensaje': "Cursos Listados"})
     except Exception as ex:
-        return jsonify({'Mensaje': "Error"})
+        return jsonify({'Mensaje': "Error GET"})
 
 
 @app.route('/cursos/<codigo>', methods=['GET'])
@@ -34,7 +34,7 @@ def leer_curso(codigo):
                      'Nombre': datos[1], 'Creditos': datos[2]}
             return jsonify({'Cursos': curso, 'Mensaje': "Curso Encontrado"})
     except Exception as ex:
-        return jsonify({'Mensaje': "Curso No Encontrado"})
+        return jsonify({'Mensaje': "Curso No Encontrado, GET"})
 
 
 @app.route('/cursos', methods=['POST'])
@@ -49,7 +49,39 @@ def registrar_curso():
         conexion.connection.commit()  # Confirma la accion de inserción
         return jsonify({'Mensaje': "Curso Registrado"})
     except Exception as ex:
-        return jsonify({'Mensaje': "Error"})
+        return jsonify({'Mensaje': "Error POST"})
+
+
+@app.route('/cursos/<codigo>', methods=['DELETE'])
+def eliminar_registros(codigo):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "SELECT Codigo FROM curso WHERE codigo ='{0}'".format(codigo)
+        cursor.execute(sql)
+        dato = cursor.fetchone()
+        print(dato)
+        if dato != None:
+            sql = "DELETE From curso WHERE codigo ='{0}'".format(codigo)
+            cursor.execute(sql)
+            conexion.connection.commit()  # Confirma la accion de inserción
+            return jsonify({'Mensaje': "Curso Eliminado"})
+        else:
+            return jsonify({'Mensaje': "No se encontro curso con codigo "+codigo})
+    except Exception as ex:
+        return jsonify({'Mensaje': "Error DELETE"})
+
+
+@app.route('/cursos/<codigo>', methods=['PUT'])
+def actualizar_registros(codigo):
+    try:
+        cursor = conexion.connection.cursor()
+        sql = "UPDATE curso SET Nombre = '{0}', Creditos ='{1}' WHERE Codigo = '{2}'".format(
+            request.json['Nombre'], request.json['Creditos'], codigo)
+        cursor.execute(sql)
+        conexion.connection.commit()  # Confirma la accion de inserción
+        return jsonify({'Mensaje': "Curso Actualizado"})
+    except Exception as ex:
+        return jsonify({'Mensaje': "Error PUT"})
 
 
 def pagina_no_encontrada(error):
